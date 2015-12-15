@@ -1,25 +1,172 @@
 ---
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
+output: html_document
 ---
+# PA1 for the reproducible research class
+
+## Introduction
+
+This Readme file performs the analysis required in order to complete the 
+Project assignement 1 for the reproducible research class. 
+
+In order to be successfully reviewed, we need to allow for our r code chunks
+to be seen, we therefore set the global option
+
+```{r setoption}
+library(knitr)
+opts_chunk$set(echo=TRUE)
+```
+
+## Loading the data
+
+The first step towards the completion of the project is to load the data
+
+```{r}
+activity<-read.csv("activity.csv",sep=",",header=TRUE)
+```
+
+## Number of steps per day, mean and median
+
+We use the very handy tapply function, the index being the date, we store
+the result in a variable `sumstep` for future analysis. Note that we exclude
+the days where there are only NA values from our analysis
+
+```{r}
+sumstep<-tapply(activity$steps, activity$date,  FUN =sum)[
+    !is.na(tapply(activity$steps, activity$date,  FUN =sum))]
+sumstep
+```
+
+We then display the histogram  of th total number of steps per day
+```{r,fig.height=6}
+hist(sumstep,breaks=5, col="cornflowerblue", border="white",
+    main="histogram of the total number of steps per day",
+    xlab=" total number of steps per day", ylab="Number of occurences",
+    xlim=c(0,25000))
+```
+
+Finally, the mean the median are just computed using the corresponding 
+functions, thanks to the `sumstep` variable previously stored
+
+```{r}
+mean(sumstep)
+median(sumstep)
+```
+
+## averaged number of steps per interval
+
+We use again the tapply function, the index being now the interval.
+We store the result in a variable`meaninterval` Note that we exclude
+the NA values from our analysis (we don't show the result to save place)
+```{r}
+meaninterval<-tapply(activity$steps, activity$interval,  FUN =mean,na.rm=TRUE)
+```
+
+We know make the required time series plot
+
+```{r,fig.height=6}
+plot(activity$interval[1:length(meaninterval)],meaninterval,type="l",
+     xlab="5mn interval",ylab="averaged number of steps over all days",
+     col="cornflowerblue",lwd=3,
+     main="averaged number of steps over all days per 5 mn interval")
+```
+
+The maximum 5 mn interval is easily found thanks to 
+```{r}
+names(which.max(meaninterval))
+```
+
+which corresponds to the value
+```{r}
+meaninterval[which.max(meaninterval)]
+```
+
+## Missing data
+
+To find the number of missing data, we just use apply on the first column of
+our dataframe
+
+```{r}
+sum(apply(activity,1,FUN=is.na))
+```
+
+To fill these missing data, we will use one of the strategies advocated by the 
+project assignement, namely replacing the NA by the correponding 5 mn averaged 
+number of steps over all days
 
 
-## Loading and preprocessing the data
+```{r}
+a<-replace(activity$steps,is.na(activity$steps),meaninterval)
+```
 
+we then create our new dataset without NA values
+```{r}
+fullactivity<-activity
+fullactivity$steps<-a
+```
 
+Defining the variable corresponding to the total number of steps taken each day
 
-## What is mean total number of steps taken per day?
+```{r}
+fullsumstep<-tapply(fullactivity$steps, fullactivity$date,  FUN =sum)
+fullsumstep
+```
 
+we do the same histogram as in part 1 with this new dataset
 
+```{r,fig.height=6}
+hist(fullsumstep,breaks=5, col="cornflowerblue", border="white",
+    main="histogram of the total number of steps per day",
+    xlab=" total number of steps per day", ylab="Number of occurences",
+    xlim=c(0,25000))
+```
 
-## What is the average daily activity pattern?
+Finally, the mean the median are just computed using the corresponding 
+functions, thanks to the ```fullsumstep``` variable previously stored
 
+```{r}
+mean(fullsumstep)
+median(fullsumstep)
+```
 
+we find that the mean is unchanged, while the median is now slightly changed,
+and equal to the mean. This makes perfect sense, as we completed the missing
+data (corresponding to 8 full days) with the 5 mn averaged over all days, and
+summing over the full day it gives a total number of steps equal to the mean. 
+So the mean is obviously left unchanged, and since we added 8 "mean values"
+the median now equal one of these values, hence the mean.
 
-## Imputing missing values
+## Impact of the day of the week
 
+TO create our new factor we start by creating our weekday vector (sorry for
+the french names :)
+```{r}
+weekday<-c("lundi","mardi","mercredi","jeudi","vendredi")
+```
 
+and we then create the new column of our dataframe with the ifelse command
+```{r}
+fullactivity$weektime<-as.factor(ifelse(weekdays(
+    strptime( fullactivity$date,"%Y-%m-%d")) %in% weekday,"weekday","weekend"))
+```
 
-## Are there differences in activity patterns between weekdays and weekends?
+With this additional index, we create the 5 mn interval averaged over either
+all weekdays or all weekends
+
+```{r}
+weekmeaninterval<-tapply(fullactivity$steps,
+    list(fullactivity$interval,fullactivity$weektime),  FUN =mean)
+```
+
+That allow us to perform the required analysis
+
+```{r,fig.height=8,fig.width=10}
+ par(mfrow=c(1,2))
+plot(fullactivity$interval[1:length(weekmeaninterval[,1])],weekmeaninterval[,1],type="l",
+    xlab="5mn interval",ylab="averaged number of steps over all days",
+    col="cornflowerblue",lwd=3,
+    main="weekdays")
+plot(fullactivity$interval[1:length(weekmeaninterval[,2])],weekmeaninterval[,2],type="l",
+    xlab="5mn interval",ylab="averaged number of steps over all days",
+    col="cornflowerblue",lwd=3,
+    main="weekends")
+```
