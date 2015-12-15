@@ -77,7 +77,7 @@ opts_chunk$set(echo=TRUE)</code></pre>
 </div>
 <div id="number-of-steps-per-day-mean-and-median" class="section level2">
 <h2>Number of steps per day, mean and median</h2>
-<p>We use the very handy tapply function, the index being the date, we store the result in a variable <code>sumstep</code> for future analysis. Note that we exclude the days where there are only NA values from our analysis</p>
+<p>We use the very handy tapply function, the index being the date, we store the result in a variable <code>sumstep</code> for future analysis.<strong>Note that we exclude the days where there are only NA values from our analysis. Consequently, these days (there are 8 of them) don’t appear in sumstep</strong></p>
 <pre class="r"><code>sumstep&lt;-tapply(activity$steps, activity$date,  FUN =sum)[
     !is.na(tapply(activity$steps, activity$date,  FUN =sum))]
 sumstep</code></pre>
@@ -175,7 +175,7 @@ fullsumstep</code></pre>
 <pre><code>## [1] 10766.19</code></pre>
 <pre class="r"><code>median(fullsumstep)</code></pre>
 <pre><code>## [1] 10766.19</code></pre>
-<p>we find that the mean is unchanged, while the median is now slightly changed, and equal to the mean. This makes perfect sense, as we completed the missing data (corresponding to 8 full days) with the 5 mn averaged over all days, and summing over the full day it gives a total number of steps equal to the mean. So the mean is obviously left unchanged, and since we added 8 “mean values” the median now equal one of these values, hence the mean.</p>
+<p>we find that the mean is unchanged, while the median is now slightly changed, and equal to the mean. This makes perfect sense, as we completed the missing data (corresponding to 8 full days) with the 5 mn averaged over all days, and summing over the full day it gives a total number of steps equal to the mean. So the mean is obviously left unchanged, and since we added 8 “mean values” the median is now equal one of these values, hence the mean.</p>
 </div>
 <div id="impact-of-the-day-of-the-week" class="section level2">
 <h2>Impact of the day of the week</h2>

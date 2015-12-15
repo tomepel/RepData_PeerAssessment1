@@ -24,8 +24,9 @@ Number of steps per day, mean and median
 ----------------------------------------
 
 We use the very handy tapply function, the index being the date, we
-store the result in a variable `sumstep` for future analysis. Note that
-we exclude the days where there are only NA values from our analysis
+store the result in a variable `sumstep` for future analysis.**Note that
+we exclude the days where there are only NA values from our analysis.
+Consequently, these days (there are 8 of them) don't appear in sumstep**
 
     sumstep<-tapply(activity$steps, activity$date,  FUN =sum)[
         !is.na(tapply(activity$steps, activity$date,  FUN =sum))]
@@ -176,8 +177,8 @@ changed, and equal to the mean. This makes perfect sense, as we
 completed the missing data (corresponding to 8 full days) with the 5 mn
 averaged over all days, and summing over the full day it gives a total
 number of steps equal to the mean. So the mean is obviously left
-unchanged, and since we added 8 "mean values" the median now equal one
-of these values, hence the mean.
+unchanged, and since we added 8 "mean values" the median is now equal
+one of these values, hence the mean.
 
 Impact of the day of the week
 -----------------------------
